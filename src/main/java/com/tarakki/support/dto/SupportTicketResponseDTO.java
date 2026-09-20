@@ -2,41 +2,44 @@ package com.tarakki.support.dto;
 
 import com.tarakki.support.enums.IssueCategory;
 import com.tarakki.support.enums.IssueType;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import com.tarakki.support.enums.TicketStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class SupportTicketRequestDTO {
+public class SupportTicketResponseDTO {
 
-    @NotNull
+    private UUID ticketId;
+
     private UUID memberId;
 
-    @NotBlank
     private String firstName;
 
-    @NotNull
     private String lastName;
 
-    @Email
-    @NotBlank
     private String email;
 
-    @NotBlank
     private String subject;
 
-    @NotNull
     private IssueCategory issueCategory;
 
-    @NotNull
     private IssueType issueType;
 
     private String message;
+
+    private TicketStatus ticketStatus;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }

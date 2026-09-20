@@ -2,7 +2,7 @@ package com.tarakki.support.serviceImpl;
 
 import com.tarakki.support.dto.SupportTicketRequestDTO;
 import com.tarakki.support.entity.SupportTicket;
-import com.tarakki.support.entity.TicketStatus;
+import com.tarakki.support.enums.TicketStatus;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.service.SupportTicketService;
 import lombok.RequiredArgsConstructor;

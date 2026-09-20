@@ -1,4 +1,4 @@
-package com.tarakki.support.entity;
+package com.tarakki.support.enums;
 
 public enum TicketStatus {
     OPEN,

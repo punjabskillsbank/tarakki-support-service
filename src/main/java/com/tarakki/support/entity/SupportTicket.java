@@ -1,5 +1,8 @@
 package com.tarakki.support.entity;
 
+import com.tarakki.support.enums.IssueCategory;
+import com.tarakki.support.enums.IssueType;
+import com.tarakki.support.enums.TicketStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

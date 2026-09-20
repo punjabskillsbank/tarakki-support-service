@@ -1,10 +1,10 @@
 package com.tarakki.support.util;
 
 import com.tarakki.support.dto.SupportTicketRequestDTO;
-import com.tarakki.support.entity.IssueCategory;
-import com.tarakki.support.entity.IssueType;
+import com.tarakki.support.enums.IssueCategory;
+import com.tarakki.support.enums.IssueType;
 import com.tarakki.support.entity.SupportTicket;
-import com.tarakki.support.entity.TicketStatus;
+import com.tarakki.support.enums.TicketStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
