@@ -1,6 +1,7 @@
 package com.tarakki.support.controller;
 
 import com.tarakki.support.dto.SupportTicketRequestDTO;
+import com.tarakki.support.dto.SupportTicketResponseDTO;
 import com.tarakki.support.entity.SupportTicket;
 import com.tarakki.support.service.SupportTicketService;
 import com.tarakki.support.util.SupportTicketTestDataFactory;
@@ -32,12 +33,13 @@ class SupportTicketControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private SupportTicketRequestDTO input;
-    private SupportTicket output;
+    private SupportTicketResponseDTO output;
 
     @BeforeEach
     void setUp() {
         input = SupportTicketTestDataFactory.createSupportTicketRequestDTO();
-        output = SupportTicketTestDataFactory.createSupportTicket(input);
+        SupportTicket ticket = SupportTicketTestDataFactory.createSupportTicket(input);
+        output = SupportTicketTestDataFactory.createSupportTicketResponseDTO(ticket);
     }
 
     @Test

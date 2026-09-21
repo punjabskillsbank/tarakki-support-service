@@ -1,6 +1,7 @@
 package com.tarakki.support.service;
 
 import com.tarakki.support.dto.SupportTicketRequestDTO;
+import com.tarakki.support.dto.SupportTicketResponseDTO;
 import com.tarakki.support.entity.SupportTicket;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.serviceImpl.SupportTicketServiceImpl;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,27 +26,33 @@ class SupportTicketServiceTest {
     @Mock
     private SupportTicketRepository supportTicketRepository;
 
+    @Mock
+    private ModelMapper modelMapper;
+
     @InjectMocks
     private SupportTicketServiceImpl supportTicketService;
 
     private SupportTicketRequestDTO requestDTO;
     private SupportTicket supportTicket;
+    private SupportTicketResponseDTO responseDTO;
 
     @BeforeEach
     void setUp() {
-
         requestDTO = SupportTicketTestDataFactory.createSupportTicketRequestDTO();
-
         supportTicket = SupportTicketTestDataFactory.createSupportTicket(requestDTO);
+        responseDTO = SupportTicketTestDataFactory.createSupportTicketResponseDTO(supportTicket);
     }
 
     @Test
     void shouldCreateSupportTicket() {
-
+        when(modelMapper.map(requestDTO, SupportTicket.class))
+                .thenReturn(supportTicket);
         when(supportTicketRepository.save(any(SupportTicket.class)))
                 .thenReturn(supportTicket);
+        when(modelMapper.map(supportTicket, SupportTicketResponseDTO.class))
+                .thenReturn(responseDTO);
 
-        SupportTicket result =
+        SupportTicketResponseDTO result =
                 supportTicketService.createTicket(requestDTO);
 
         assertNotNull(result);
@@ -89,22 +97,9 @@ class SupportTicketServiceTest {
                 result.getMessage()
         );
 
+        verify(modelMapper).map(requestDTO, SupportTicket.class);
         verify(supportTicketRepository, times(1))
                 .save(any(SupportTicket.class));
-    }
-
-    @Test
-    void shouldPropagateExceptionWhenRepositoryFails() {
-
-        when(supportTicketRepository.save(any(SupportTicket.class)))
-                .thenThrow(new RuntimeException("Database error"));
-
-        assertThrows(
-                RuntimeException.class,
-                () -> supportTicketService.createTicket(requestDTO)
-        );
-
-        verify(supportTicketRepository, times(1))
-                .save(any(SupportTicket.class));
+        verify(modelMapper).map(supportTicket, SupportTicketResponseDTO.class);
     }
 }

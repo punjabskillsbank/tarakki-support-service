@@ -6,6 +6,8 @@ import com.tarakki.support.enums.IssueType;
 import com.tarakki.support.entity.SupportTicket;
 import com.tarakki.support.enums.TicketStatus;
 
+import com.tarakki.support.dto.SupportTicketResponseDTO;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -56,5 +58,24 @@ public class SupportTicketTestDataFactory {
 
     public static SupportTicket createSupportTicket(SupportTicketRequestDTO dto) {
         return createSupportTicketEntity(dto);
+    }
+
+    public static SupportTicketResponseDTO createSupportTicketResponseDTO(
+            SupportTicket ticket) {
+
+        return SupportTicketResponseDTO.builder()
+                .ticketId(ticket.getTicketId())
+                .memberId(ticket.getMemberId())
+                .firstName(ticket.getFirstName())
+                .lastName(ticket.getLastName())
+                .email(ticket.getEmail())
+                .subject(ticket.getSubject())
+                .issueCategory(ticket.getIssueCategory())
+                .issueType(ticket.getIssueType())
+                .message(ticket.getMessage())
+                .ticketStatus(ticket.getTicketStatus())
+                .createdAt(ticket.getCreatedAt())
+                .updatedAt(ticket.getUpdatedAt())
+                .build();
     }
 }
