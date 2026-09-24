@@ -38,5 +38,6 @@ public class SupportTicketRequestDTO {
     @NotNull
     private IssueType issueType;
 
+    @NotNull
     private String message;
 }

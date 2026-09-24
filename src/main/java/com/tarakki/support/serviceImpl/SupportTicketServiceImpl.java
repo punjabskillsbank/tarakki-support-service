@@ -29,8 +29,6 @@ public class SupportTicketServiceImpl implements SupportTicketService {
         LocalDateTime now = LocalDateTime.now();
 
         ticket.setTicketStatus(TicketStatus.OPEN);
-        ticket.setCreatedAt(now);
-        ticket.setUpdatedAt(now);
 
         SupportTicket savedTicket =
                 supportTicketRepository.save(ticket);
