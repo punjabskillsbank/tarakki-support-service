@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class SupportTicketServiceImpl implements SupportTicketService {
@@ -25,8 +23,6 @@ public class SupportTicketServiceImpl implements SupportTicketService {
 
         SupportTicket ticket =
                 modelMapper.map(requestDTO, SupportTicket.class);
-
-        LocalDateTime now = LocalDateTime.now();
 
         ticket.setTicketStatus(TicketStatus.OPEN);
 
