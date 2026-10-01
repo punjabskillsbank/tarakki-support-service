@@ -6,7 +6,9 @@ import com.tarakki.support.enums.TicketStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -41,10 +43,12 @@ public class SupportTicket {
     private String subject;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "issue_category", nullable = false)
     private IssueCategory issueCategory;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "issue_type", nullable = false)
     private IssueType issueType;
 
@@ -52,6 +56,7 @@ public class SupportTicket {
     private String message;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "ticket_status", nullable = false)
     private TicketStatus ticketStatus;
 
