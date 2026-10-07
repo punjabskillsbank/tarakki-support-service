@@ -26,4 +26,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errors);
     }
+
+    @ExceptionHandler(SupportTicketMessageNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFoundException(
+            SupportTicketMessageNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
 }

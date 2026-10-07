@@ -6,6 +6,7 @@ import com.tarakki.support.entity.SupportTicketMessage;
 import com.tarakki.support.repository.SupportTicketMessageRepository;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.service.SupportTicketMessageService;
+import com.tarakki.support.exception.SupportTicketMessageNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class SupportTicketMessageServiceImpl implements SupportTicketMessageServ
     public SupportTicketMessageResponseDTO createMessage(SupportTicketMessageRequestDTO requestDTO) {
 
         if (!supportTicketRepository.existsById(requestDTO.getTicketId())) {
-            throw new IllegalArgumentException("Support ticket not found with ID: " + requestDTO.getTicketId());
+            throw new SupportTicketMessageNotFoundException("Support ticket not found with ID: " + requestDTO.getTicketId());
         }
 
         SupportTicketMessage ticketMessage = modelMapper.map(requestDTO, SupportTicketMessage.class);
