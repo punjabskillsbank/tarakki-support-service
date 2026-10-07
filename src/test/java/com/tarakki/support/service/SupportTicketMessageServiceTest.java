@@ -90,7 +90,6 @@ public class SupportTicketMessageServiceTest {
 
         SupportTicketMessageResponseDTO result = supportTicketMessageService.createMessage(requestDTO);
 
-        // Assert
         assertNotNull(result);
         assertEquals(messageId, result.getMessageId());
         assertEquals(ticketId, result.getTicketId());
