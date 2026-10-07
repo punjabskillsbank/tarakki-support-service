@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class SupportTicketServiceImpl implements SupportTicketService {
@@ -33,5 +36,14 @@ public class SupportTicketServiceImpl implements SupportTicketService {
                 savedTicket,
                 SupportTicketResponseDTO.class
         );
+    }
+
+
+    @Override
+    public List<SupportTicketResponseDTO> getTicketsByMember(UUID memberId) {
+        List<SupportTicket> boards = supportTicketRepository.findByMemberId(memberId);
+        return boards.stream()
+                .map(board -> modelMapper.map(board, SupportTicketResponseDTO.class))
+                .toList();
     }
 }

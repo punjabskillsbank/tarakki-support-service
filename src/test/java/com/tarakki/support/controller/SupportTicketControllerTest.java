@@ -16,8 +16,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -62,5 +67,69 @@ class SupportTicketControllerTest {
                 .andExpect(jsonPath("$.issueType").value(input.getIssueType().name()))
                 .andExpect(jsonPath("$.message").value(input.getMessage()))
                 .andExpect(jsonPath("$.ticketStatus").value("OPEN"));
+    }
+
+    @Test
+    void shouldGetTicketsByMemberAndReturn200Ok() throws Exception {
+
+        UUID memberId =
+                SupportTicketTestDataFactory.MEMBER_ID;
+
+        List<SupportTicketResponseDTO> tickets =
+                List.of(output);
+
+        when(supportTicketService.getTicketsByMember(memberId))
+                .thenReturn(tickets);
+
+        mockMvc.perform(
+                        get("/api/support/tickets/{memberId}", memberId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].ticketId")
+                        .value(output.getTicketId().toString()))
+                .andExpect(jsonPath("$[0].memberId")
+                        .value(output.getMemberId().toString()))
+                .andExpect(jsonPath("$[0].firstName")
+                        .value(output.getFirstName()))
+                .andExpect(jsonPath("$[0].lastName")
+                        .value(output.getLastName()))
+                .andExpect(jsonPath("$[0].email")
+                        .value(output.getEmail()))
+                .andExpect(jsonPath("$[0].subject")
+                        .value(output.getSubject()))
+                .andExpect(jsonPath("$[0].issueCategory")
+                        .value(output.getIssueCategory().name()))
+                .andExpect(jsonPath("$[0].issueType")
+                        .value(output.getIssueType().name()))
+                .andExpect(jsonPath("$[0].message")
+                        .value(output.getMessage()))
+                .andExpect(jsonPath("$[0].ticketStatus")
+                        .value(output.getTicketStatus().name()));
+
+        verify(supportTicketService)
+                .getTicketsByMember(memberId);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenMemberHasNoTickets() throws Exception {
+
+        UUID memberId = UUID.randomUUID();
+
+        when(supportTicketService.getTicketsByMember(memberId))
+                .thenReturn(List.of());
+
+        mockMvc.perform(
+                        get("/api/support/tickets/{memberId}", memberId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        verify(supportTicketService)
+                .getTicketsByMember(memberId);
     }
 }

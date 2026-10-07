@@ -16,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -101,5 +104,166 @@ class SupportTicketServiceTest {
         verify(supportTicketRepository, times(1))
                 .save(any(SupportTicket.class));
         verify(modelMapper).map(supportTicket, SupportTicketResponseDTO.class);
+    }
+
+    @Test
+    void shouldGetTicketsByMemberSuccessfully() {
+
+        UUID memberId =
+                SupportTicketTestDataFactory.MEMBER_ID;
+
+        List<SupportTicket> tickets =
+                List.of(supportTicket);
+
+        when(supportTicketRepository.findByMemberId(memberId))
+                .thenReturn(tickets);
+
+        when(modelMapper.map(
+                supportTicket,
+                SupportTicketResponseDTO.class))
+                .thenReturn(responseDTO);
+
+        List<SupportTicketResponseDTO> result =
+                supportTicketService.getTicketsByMember(memberId);
+
+        assertNotNull(result);
+
+        assertEquals(1, result.size());
+
+        assertEquals(
+                responseDTO.getTicketId(),
+                result.get(0).getTicketId()
+        );
+
+        assertEquals(
+                responseDTO.getMemberId(),
+                result.get(0).getMemberId()
+        );
+
+        assertEquals(
+                responseDTO.getFirstName(),
+                result.get(0).getFirstName()
+        );
+
+        assertEquals(
+                responseDTO.getLastName(),
+                result.get(0).getLastName()
+        );
+
+        assertEquals(
+                responseDTO.getEmail(),
+                result.get(0).getEmail()
+        );
+
+        assertEquals(
+                responseDTO.getSubject(),
+                result.get(0).getSubject()
+        );
+
+        assertEquals(
+                responseDTO.getIssueCategory(),
+                result.get(0).getIssueCategory()
+        );
+
+        assertEquals(
+                responseDTO.getIssueType(),
+                result.get(0).getIssueType()
+        );
+
+        assertEquals(
+                responseDTO.getMessage(),
+                result.get(0).getMessage()
+        );
+
+        assertEquals(
+                responseDTO.getTicketStatus(),
+                result.get(0).getTicketStatus()
+        );
+
+        verify(supportTicketRepository)
+                .findByMemberId(memberId);
+
+        verify(modelMapper)
+                .map(
+                        supportTicket,
+                        SupportTicketResponseDTO.class
+                );
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenMemberHasNoTickets() {
+
+        UUID memberId = UUID.randomUUID();
+
+        when(supportTicketRepository.findByMemberId(memberId))
+                .thenReturn(List.of());
+
+        List<SupportTicketResponseDTO> result =
+                supportTicketService.getTicketsByMember(memberId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(supportTicketRepository)
+                .findByMemberId(memberId);
+
+        verifyNoInteractions(modelMapper);
+    }
+
+    @Test
+    void shouldGetMultipleTicketsByMemberSuccessfully() {
+
+        SupportTicket secondTicket =
+                SupportTicketTestDataFactory
+                        .createSupportTicket(requestDTO);
+
+        SupportTicketResponseDTO secondResponse =
+                SupportTicketTestDataFactory
+                        .createSupportTicketResponseDTO(secondTicket);
+
+        UUID memberId =
+                SupportTicketTestDataFactory.MEMBER_ID;
+
+        List<SupportTicket> tickets =
+                List.of(supportTicket, secondTicket);
+
+        when(supportTicketRepository.findByMemberId(memberId))
+                .thenReturn(tickets);
+
+        when(modelMapper.map(
+                supportTicket,
+                SupportTicketResponseDTO.class))
+                .thenReturn(responseDTO);
+
+        when(modelMapper.map(
+                secondTicket,
+                SupportTicketResponseDTO.class))
+                .thenReturn(secondResponse);
+
+        List<SupportTicketResponseDTO> result =
+                supportTicketService.getTicketsByMember(memberId);
+
+        assertNotNull(result);
+
+        assertEquals(2, result.size());
+
+        assertEquals(
+                supportTicket.getTicketId(),
+                result.get(0).getTicketId()
+        );
+
+        assertEquals(
+                secondTicket.getTicketId(),
+                result.get(1).getTicketId()
+        );
+
+        verify(supportTicketRepository)
+                .findByMemberId(memberId);
+
+        verify(modelMapper, times(2))
+                .map(
+                        any(SupportTicket.class),
+                        eq(SupportTicketResponseDTO.class)
+                );
     }
 }
