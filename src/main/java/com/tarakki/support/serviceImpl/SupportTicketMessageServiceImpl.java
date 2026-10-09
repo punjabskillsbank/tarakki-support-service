@@ -23,7 +23,7 @@ public class SupportTicketMessageServiceImpl implements SupportTicketMessageServ
     public SupportTicketMessageResponseDTO createMessage(SupportTicketMessageRequestDTO requestDTO) {
 
         if (!supportTicketRepository.existsById(requestDTO.getTicketId())) {
-            throw new SupportTicketMessageNotFoundException("Support ticket not found with ID: " + requestDTO.getTicketId());
+            throw new SupportTicketMessageNotFoundException(requestDTO.getTicketId());
         }
 
         SupportTicketMessage ticketMessage = modelMapper.map(requestDTO, SupportTicketMessage.class);

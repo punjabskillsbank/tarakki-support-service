@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(SupportTicketMessageNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleResourceNotFoundException(
+    public ResponseEntity<Map<String, String>> handleSupportTicketMessageNotFound(
             SupportTicketMessageNotFoundException ex) {
 
         return ResponseEntity
