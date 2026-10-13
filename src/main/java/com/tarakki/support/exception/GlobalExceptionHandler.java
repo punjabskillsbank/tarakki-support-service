@@ -31,9 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleSupportTicketMessageNotFound(
             SupportTicketMessageNotFoundException ex) {
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(Map.of("error", ex.getMessage()));
+        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MemberNotFoundException.class)
