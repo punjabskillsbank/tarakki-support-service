@@ -3,9 +3,11 @@ package com.tarakki.support.service;
 import com.tarakki.support.dto.SupportTicketRequestDTO;
 import com.tarakki.support.dto.SupportTicketResponseDTO;
 import com.tarakki.support.entity.SupportTicket;
+import com.tarakki.support.exception.MemberNotFoundException;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.serviceImpl.SupportTicketServiceImpl;
 import com.tarakki.support.util.SupportTicketTestDataFactory;
+import com.tarakki.support.client.MemberClient;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,9 @@ class SupportTicketServiceTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private MemberClient memberClient;
 
     @InjectMocks
     private SupportTicketServiceImpl supportTicketService;
@@ -179,7 +184,7 @@ class SupportTicketServiceTest {
                 responseDTO.getTicketStatus(),
                 result.get(0).getTicketStatus()
         );
-
+        verify(memberClient).validateMemberExists(memberId);
         verify(supportTicketRepository)
                 .findByMemberId(memberId);
 
@@ -203,7 +208,7 @@ class SupportTicketServiceTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-
+        verify(memberClient).validateMemberExists(memberId);
         verify(supportTicketRepository)
                 .findByMemberId(memberId);
 
@@ -265,5 +270,23 @@ class SupportTicketServiceTest {
                         any(SupportTicket.class),
                         eq(SupportTicketResponseDTO.class)
                 );
+    }
+
+    @Test
+    void shouldThrowExceptionWhenMemberDoesNotExist() {
+        UUID memberId = UUID.randomUUID();
+
+        doThrow(new MemberNotFoundException(memberId))
+                .when(memberClient)
+                .validateMemberExists(memberId);
+
+        assertThrows(
+                MemberNotFoundException.class,
+                () -> supportTicketService.getTicketsByMember(memberId)
+        );
+
+        verify(memberClient).validateMemberExists(memberId);
+
+        verifyNoInteractions(supportTicketRepository);
     }
 }
