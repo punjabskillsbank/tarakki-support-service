@@ -43,6 +43,7 @@ public class SupportTicketServiceImpl implements SupportTicketService {
         );
     }
 
+
     @Override
     public List<SupportTicketResponseDTO> getTicketsByMember(UUID memberId) {
 
