@@ -4,6 +4,7 @@ import tools.jackson.databind.ObjectMapper;
 import com.tarakki.support.dto.SupportTicketMessageRequestDTO;
 import com.tarakki.support.dto.SupportTicketMessageResponseDTO;
 import com.tarakki.support.service.SupportTicketMessageService;
+import com.tarakki.support.util.SupportTicketTestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -43,18 +43,8 @@ class SupportTicketMessageControllerTest {
         ticketId = UUID.randomUUID();
         messageId = UUID.randomUUID();
 
-        requestDTO = SupportTicketMessageRequestDTO.builder()
-                .ticketId(ticketId)
-                .userId(UUID.randomUUID())
-                .messageBody("Hello team")
-                .build();
-
-        responseDTO = SupportTicketMessageResponseDTO.builder()
-                .messageId(messageId)
-                .ticketId(ticketId)
-                .messageBody("Hello team")
-                .createdAt(LocalDateTime.now())
-                .build();
+        requestDTO = SupportTicketTestDataFactory.createSupportTicketMessageRequestDTO(ticketId);
+        responseDTO = SupportTicketTestDataFactory.createSupportTicketMessageResponseDTO(messageId, requestDTO);
     }
 
     @Test

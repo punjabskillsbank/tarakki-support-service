@@ -51,8 +51,8 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("GET on missing resource - should return 404 Not Found with error message")
-    void shouldReturn404_WhenResourceNotFound() throws Exception {
+    @DisplayName("GET on missing support ticket message - should return 404 Not Found with error message")
+    void shouldReturn404_WhenSupportTicketMessageNotFound() throws Exception {
 
         mockMvc.perform(get("/test/not-found"))
                 .andExpect(status().isNotFound())
@@ -69,7 +69,7 @@ class GlobalExceptionHandlerTest {
 
         @GetMapping("/test/not-found")
         public void throwNotFound() {
-            throw new SupportTicketMessageNotFoundException("Support ticket not found with ID: abc-123");
+            throw new SupportTicketMessageNotFoundException("abc-123");
         }
     }
 }
