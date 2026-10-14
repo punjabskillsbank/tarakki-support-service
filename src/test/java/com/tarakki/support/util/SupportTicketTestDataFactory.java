@@ -1,6 +1,9 @@
 package com.tarakki.support.util;
 
+import com.tarakki.support.dto.SupportTicketMessageRequestDTO;
+import com.tarakki.support.dto.SupportTicketMessageResponseDTO;
 import com.tarakki.support.dto.SupportTicketRequestDTO;
+import com.tarakki.support.entity.SupportTicketMessage;
 import com.tarakki.support.enums.IssueCategory;
 import com.tarakki.support.enums.IssueType;
 import com.tarakki.support.entity.SupportTicket;
@@ -76,6 +79,40 @@ public class SupportTicketTestDataFactory {
                 .ticketStatus(ticket.getTicketStatus())
                 .createdAt(ticket.getCreatedAt())
                 .updatedAt(ticket.getUpdatedAt())
+                .build();
+    }
+
+    public static SupportTicketMessageRequestDTO createSupportTicketMessageRequestDTO(UUID ticketId) {
+        return SupportTicketMessageRequestDTO.builder()
+                .ticketId(ticketId)
+                .userId(UUID.randomUUID())
+                .supportId(UUID.randomUUID())
+                .messageBody("Hello team")
+                .build();
+    }
+
+    public static SupportTicketMessageResponseDTO createSupportTicketMessageResponseDTO(
+            UUID messageId, SupportTicketMessageRequestDTO dto) {
+        return SupportTicketMessageResponseDTO.builder()
+                .messageId(messageId)
+                .ticketId(dto.getTicketId())
+                .userId(dto.getUserId())
+                .supportId(dto.getSupportId())
+                .messageBody(dto.getMessageBody())
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static SupportTicketMessage createSupportTicketMessageEntity(
+            UUID messageId, SupportTicketMessageRequestDTO dto) {
+
+        return SupportTicketMessage.builder()
+                .messageId(messageId)
+                .ticketId(dto.getTicketId())
+                .userId(dto.getUserId())
+                .supportId(dto.getSupportId())
+                .messageBody(dto.getMessageBody())
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 }
