@@ -33,8 +33,8 @@ public class RestClientConfig {
     @Bean
     public RestClient memberServiceRestClient(
             RestClient.Builder builder,
-            @Value("${member.service.base-url}") String memberServiceBaseUrl) {
+            @Value("${member.api.endpoint}") String memberApiEndpoint) {
 
-        return builder.baseUrl(memberServiceBaseUrl).build();
+        return builder.baseUrl(memberApiEndpoint).build();
     }
 }

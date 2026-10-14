@@ -11,6 +11,7 @@ import com.tarakki.support.service.SupportTicketService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import java.util.List;
@@ -42,20 +43,21 @@ public class SupportTicketServiceImpl implements SupportTicketService {
         );
     }
 
-
     @Override
     public List<SupportTicketResponseDTO> getTicketsByMember(UUID memberId) {
-        validateMember(memberId);
-        List<SupportTicket> boards = supportTicketRepository.findByMemberId(memberId);
-        return boards.stream()
-                .map(board -> modelMapper.map(board, SupportTicketResponseDTO.class))
-                .toList();
-    }
-    private void validateMember(UUID memberId) {
+
         try {
-            memberClient.validateMemberExists(memberId);
-        } catch (RestClientException exception) {
+            memberClient.getMemberById(memberId);
+        } catch (HttpClientErrorException.NotFound exception) {
             throw new MemberNotFoundException(memberId);
         }
+
+        List<SupportTicket> tickets =
+                supportTicketRepository.findByMemberId(memberId);
+
+        return tickets.stream()
+                .map(ticket ->
+                        modelMapper.map(ticket, SupportTicketResponseDTO.class))
+                .toList();
     }
 }

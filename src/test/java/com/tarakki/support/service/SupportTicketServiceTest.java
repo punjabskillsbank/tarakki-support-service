@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.UUID;
@@ -184,7 +185,7 @@ class SupportTicketServiceTest {
                 responseDTO.getTicketStatus(),
                 result.get(0).getTicketStatus()
         );
-        verify(memberClient).validateMemberExists(memberId);
+        verify(memberClient).getMemberById(memberId);
         verify(supportTicketRepository)
                 .findByMemberId(memberId);
 
@@ -208,7 +209,7 @@ class SupportTicketServiceTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(memberClient).validateMemberExists(memberId);
+        verify(memberClient).getMemberById(memberId);
         verify(supportTicketRepository)
                 .findByMemberId(memberId);
 
@@ -270,23 +271,28 @@ class SupportTicketServiceTest {
                         any(SupportTicket.class),
                         eq(SupportTicketResponseDTO.class)
                 );
+        verify(memberClient).getMemberById(memberId);
     }
 
     @Test
     void shouldThrowExceptionWhenMemberDoesNotExist() {
         UUID memberId = UUID.randomUUID();
 
-        doThrow(new MemberNotFoundException(memberId))
-                .when(memberClient)
-                .validateMemberExists(memberId);
+        when(memberClient.getMemberById(memberId))
+                .thenThrow(HttpClientErrorException.create(
+                        org.springframework.http.HttpStatus.NOT_FOUND,
+                        "Not Found",
+                        org.springframework.http.HttpHeaders.EMPTY,
+                        new byte[0],
+                        java.nio.charset.StandardCharsets.UTF_8
+                ));
 
         assertThrows(
                 MemberNotFoundException.class,
                 () -> supportTicketService.getTicketsByMember(memberId)
         );
 
-        verify(memberClient).validateMemberExists(memberId);
-
+        verify(memberClient).getMemberById(memberId);
         verifyNoInteractions(supportTicketRepository);
     }
 }
