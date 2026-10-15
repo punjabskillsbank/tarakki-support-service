@@ -1,3 +1,4 @@
+```yaml
 name: Run Unit Tests on PR
 
 on:
@@ -36,27 +37,17 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Authenticate Maven with GitHub Packages
-        run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<EOF
-          <settings>
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${{ github.actor }}</username>
-                <password>${{ secrets.GITHUB_TOKEN }}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
+          distribution: temurin
+          cache: maven
+          server-id: github
+          server-username: PACKAGES_READ_USER
+          server-password: PACKAGES_READ_TOKEN
 
       - name: Run all JUnit tests
-        run: mvn test
+        run: mvn --batch-mode test
         env:
+          PACKAGES_READ_USER: ${{ secrets.PACKAGES_READ_USER }}
+          PACKAGES_READ_TOKEN: ${{ secrets.PACKAGES_READ_TOKEN }}
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/tarakki_local
           SPRING_DATASOURCE_USERNAME: tarakki
           SPRING_DATASOURCE_PASSWORD: tarakki
@@ -67,4 +58,5 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: target/surefire-reports/
+          path: '**/target/surefire-reports/'
+```
