@@ -1,11 +1,13 @@
 package com.tarakki.support.service;
 
+
 import com.tarakki.support.dto.SupportTicketMessageRequestDTO;
 import com.tarakki.support.dto.SupportTicketMessageResponseDTO;
 import com.tarakki.support.entity.SupportTicketMessage;
 import com.tarakki.support.repository.SupportTicketMessageRepository;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.serviceImpl.SupportTicketMessageServiceImpl;
+import com.tarakki.support.util.SupportTicketTestDataFactory;
 import com.tarakki.support.exception.SupportTicketMessageNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,8 +41,6 @@ public class SupportTicketMessageServiceTest {
     private SupportTicketMessageServiceImpl supportTicketMessageService;
 
     private UUID ticketId;
-    private UUID userId;
-    private UUID supportId;
     private UUID messageId;
     private SupportTicketMessageRequestDTO requestDTO;
     private SupportTicketMessage messageEntity;
@@ -49,34 +49,15 @@ public class SupportTicketMessageServiceTest {
     @BeforeEach
     void setUp() {
         ticketId = UUID.randomUUID();
-        userId = UUID.randomUUID();
-        supportId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID supportId = UUID.randomUUID();
         messageId = UUID.randomUUID();
 
-        requestDTO = SupportTicketMessageRequestDTO.builder()
-                .ticketId(ticketId)
-                .userId(userId)
-                .supportId(supportId)
-                .messageBody("Test message body")
-                .build();
+        requestDTO = SupportTicketTestDataFactory.createSupportTicketMessageRequestDTO(ticketId);
 
-        messageEntity = SupportTicketMessage.builder()
-                .messageId(messageId)
-                .ticketId(ticketId)
-                .userId(userId)
-                .supportId(supportId)
-                .messageBody("Test message body")
-                .createdAt(LocalDateTime.now())
-                .build();
+        messageEntity = SupportTicketTestDataFactory.createSupportTicketMessageEntity(messageId, requestDTO);
 
-        responseDTO = SupportTicketMessageResponseDTO.builder()
-                .messageId(messageId)
-                .ticketId(ticketId)
-                .userId(userId)
-                .supportId(supportId)
-                .messageBody("Test message body")
-                .createdAt(messageEntity.getCreatedAt())
-                .build();
+        responseDTO = SupportTicketTestDataFactory.createSupportTicketMessageResponseDTO(messageId, requestDTO);
     }
 
     @Test
@@ -93,11 +74,12 @@ public class SupportTicketMessageServiceTest {
         assertNotNull(result);
         assertEquals(messageId, result.getMessageId());
         assertEquals(ticketId, result.getTicketId());
-        assertEquals("Test message body", result.getMessageBody());
+        assertEquals("Hello team", result.getMessageBody());
 
         verify(supportTicketRepository, times(1)).existsById(ticketId);
         verify(supportTicketMessageRepository, times(1)).save(messageEntity);
     }
+
 
     @Test
     @DisplayName("Create Message - Ticket Not Found Exception")
@@ -113,5 +95,31 @@ public class SupportTicketMessageServiceTest {
         assertEquals("Support ticket not found with ID: " + ticketId, exception.getMessage());
         verify(supportTicketRepository, times(1)).existsById(ticketId);
         verify(supportTicketMessageRepository, never()).save(any());
+    }
+
+
+    @Test
+    @DisplayName("Get Message - Success Scenario")
+    void getMessage_success() {
+        when(supportTicketRepository.existsById(ticketId)).thenReturn(true);
+
+        when(supportTicketMessageRepository.findByTicketId(ticketId)).thenReturn(List.of(messageEntity));
+
+        when(modelMapper.map(any(SupportTicketMessage.class), eq(SupportTicketMessageResponseDTO.class)))
+                .thenReturn(responseDTO);
+
+        List<SupportTicketMessageResponseDTO> result = supportTicketMessageService.getMessageByTicketId(ticketId);
+
+        assertNotNull(result);
+        assertEquals(requestDTO.getTicketId(), result.get(0).getTicketId());
+        assertEquals(requestDTO.getMessageBody(), result.get(0).getMessageBody());
+        assertEquals(requestDTO.getSupportId(), result.get(0).getSupportId());
+        assertEquals(requestDTO.getUserId(), result.get(0).getUserId());
+
+        verify(supportTicketRepository).existsById(ticketId);
+        verify(supportTicketMessageRepository).findByTicketId(ticketId);
+        verify(modelMapper).map(any(SupportTicketMessage.class), eq(SupportTicketMessageResponseDTO.class));
+
+
     }
 }

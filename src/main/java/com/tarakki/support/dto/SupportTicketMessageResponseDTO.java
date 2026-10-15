@@ -18,5 +18,4 @@ public class SupportTicketMessageResponseDTO {
     private UUID userId;
     private String messageBody;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
