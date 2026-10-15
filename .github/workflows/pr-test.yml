@@ -27,7 +27,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,9 +52,8 @@ jobs:
             </servers>
           </settings>
           EOF
-
       - name: Run all JUnit tests
-        run: mvn test
+        run: mvn test -U
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/tarakki_local
           SPRING_DATASOURCE_USERNAME: tarakki
