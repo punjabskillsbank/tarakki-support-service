@@ -1,91 +1,68 @@
-name: Convention Check
+name: Run Unit Tests on PR
 
 on:
-  push:
   pull_request:
+    branches:
+      - develop
 
 jobs:
-  validate:
+  test:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: read
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: tarakki_local
+          POSTGRES_USER: tarakki
+          POSTGRES_PASSWORD: tarakki
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
         with:
-          fetch-depth: 0
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Validate Branch and Commits
-        shell: bash
+      - name: Authenticate Maven with GitHub Packages
         run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>github</id>
+                <username>${{ github.actor }}</username>
+                <password>${{ secrets.GITHUB_TOKEN }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+      - name: Run all JUnit tests
+        run: mvn test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/tarakki_local
+          SPRING_DATASOURCE_USERNAME: tarakki
+          SPRING_DATASOURCE_PASSWORD: tarakki
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
 
-          BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
-
-          echo "Branch: $BRANCH"
-
-          # Allow main and develop branches
-          if [[ "$BRANCH" == "develop" ]]; then
-            echo "Skipping validation for $BRANCH"
-            exit 0
-          fi
-
-          # Validate branch format
-          if [[ ! "$BRANCH" =~ ^(feature|bugfix)/TK_([0-9]+)$ ]]; then
-            echo "Invalid branch name"
-            echo "Expected: feature/TK_<TICKET_ID> or bugfix/TK_<TICKET_ID>"
-            echo "Please rename the branch!"
-            exit 1
-          fi
-
-          TICKET="TK_${BASH_REMATCH[2]}"
-
-          echo "Ticket extracted: $TICKET"
-
-          # Determine commit range
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            COMMITS=$(git log \
-              --format="%s" \
-              ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
-          else
-            # Exclude commits already on the base branch (develop or main)
-            BASE_BRANCH=""
-            if git rev-parse --verify origin/develop &>/dev/null; then
-              BASE_BRANCH="origin/develop"
-            elif git rev-parse --verify origin/main &>/dev/null; then
-              BASE_BRANCH="origin/main"
-            elif git rev-parse --verify develop &>/dev/null; then
-              BASE_BRANCH="develop"
-            elif git rev-parse --verify main &>/dev/null; then
-              BASE_BRANCH="main"
-            fi
-
-            if [[ -n "$BASE_BRANCH" ]]; then
-              COMMITS=$(git log --format="%s" "$BASE_BRANCH..HEAD")
-            else
-              COMMITS=$(git log --format="%s" -1 HEAD)
-            fi
-          fi
-
-          while IFS= read -r COMMIT; do
-            # Skip empty lines
-            if [[ -z "$COMMIT" ]]; then
-              continue
-            fi
-
-            echo "Checking: $COMMIT"
-
-            if [[ ! "$COMMIT" =~ ^TK_([0-9]+):\ .+$ ]]; then
-              echo "Invalid commit message"
-              echo "Expected format: $TICKET: message"
-              echo "Commit not saved!"
-              exit 1
-            fi
-
-            COMMIT_TICKET="TK_${BASH_REMATCH[1]}"
-
-            if [[ "$COMMIT_TICKET" != "$TICKET" ]]; then
-              echo "Ticket mismatch"
-              echo "Branch Ticket : $TICKET"
-              echo "Commit Ticket : $COMMIT_TICKET"
-              exit 1
-            fi
-
-          done <<< "$COMMITS"
+      - name: Publish test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: target/surefire-reports/
