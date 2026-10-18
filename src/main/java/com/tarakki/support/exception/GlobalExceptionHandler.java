@@ -35,7 +35,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MemberNotFoundException.class)
-    public ResponseEntity<String> handleMemberNotFoundException(MemberNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<Map<String, String>> handleMemberNotFoundException(
+            MemberNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
     }
+
+
+    @ExceptionHandler(MemberServiceUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleMemberServiceUnavailable(
+            MemberServiceUnavailableException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
 }

@@ -6,12 +6,14 @@ import com.tarakki.support.dto.SupportTicketResponseDTO;
 import com.tarakki.support.entity.SupportTicket;
 import com.tarakki.support.enums.TicketStatus;
 import com.tarakki.support.exception.MemberNotFoundException;
+import com.tarakki.support.exception.MemberServiceUnavailableException;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.service.SupportTicketService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +44,7 @@ public class SupportTicketServiceImpl implements SupportTicketService {
         );
     }
 
+
     @Override
     public List<SupportTicketResponseDTO> getTicketsByMember(UUID memberId) {
 
@@ -49,6 +52,8 @@ public class SupportTicketServiceImpl implements SupportTicketService {
             memberClient.getMemberById(memberId);
         } catch (HttpClientErrorException.NotFound exception) {
             throw new MemberNotFoundException(memberId);
+        } catch (RestClientException exception) {
+            throw new MemberServiceUnavailableException(exception);
         }
 
         List<SupportTicket> tickets =
@@ -59,4 +64,5 @@ public class SupportTicketServiceImpl implements SupportTicketService {
                         modelMapper.map(ticket, SupportTicketResponseDTO.class))
                 .toList();
     }
+
 }

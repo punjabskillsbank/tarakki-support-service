@@ -143,9 +143,9 @@ class SupportTicketControllerTest {
                         get("/api/support/tickets/{memberId}", memberId)
                 )
                 .andExpect(status().isNotFound())
-                .andExpect(content().string(
-                        "Member not found with id: " + memberId
-                ));
+                .andExpect(jsonPath(
+                "$.error")
+                .value("Member not found with id: " + memberId));
 
         verify(supportTicketService).getTicketsByMember(memberId);
     }

@@ -5,6 +5,7 @@ import com.tarakki.support.dto.SupportTicketRequestDTO;
 import com.tarakki.support.dto.SupportTicketResponseDTO;
 import com.tarakki.support.entity.SupportTicket;
 import com.tarakki.support.exception.MemberNotFoundException;
+import com.tarakki.support.exception.MemberServiceUnavailableException;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.serviceImpl.SupportTicketServiceImpl;
 import com.tarakki.support.util.SupportTicketTestDataFactory;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.List;
 import java.util.UUID;
@@ -293,5 +295,19 @@ class SupportTicketServiceTest {
 
         verify(memberClient).getMemberById(memberId);
         verifyNoInteractions(supportTicketRepository);
+    }
+    @Test
+    void getTicketsByMember_whenMemberServiceIsUnreachable_throwsUnavailableException() {
+        UUID memberId = UUID.randomUUID();
+
+        when(memberClient.getMemberById(memberId))
+                .thenThrow(new ResourceAccessException("Connection refused"));
+
+        assertThrows(
+                MemberServiceUnavailableException.class,
+                () -> supportTicketService.getTicketsByMember(memberId)
+        );
+
+        verify(memberClient).getMemberById(memberId);
     }
 }
