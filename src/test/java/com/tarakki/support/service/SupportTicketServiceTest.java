@@ -1,8 +1,11 @@
 package com.tarakki.support.service;
 
+import com.tarakki.support.client.MemberClient;
 import com.tarakki.support.dto.SupportTicketRequestDTO;
 import com.tarakki.support.dto.SupportTicketResponseDTO;
 import com.tarakki.support.entity.SupportTicket;
+import com.tarakki.support.exception.MemberNotFoundException;
+import com.tarakki.support.exception.MemberServiceUnavailableException;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.serviceImpl.SupportTicketServiceImpl;
 import com.tarakki.support.util.SupportTicketTestDataFactory;
@@ -15,6 +18,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
+
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +36,9 @@ class SupportTicketServiceTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private MemberClient memberClient;
 
     @InjectMocks
     private SupportTicketServiceImpl supportTicketService;
@@ -101,5 +112,202 @@ class SupportTicketServiceTest {
         verify(supportTicketRepository, times(1))
                 .save(any(SupportTicket.class));
         verify(modelMapper).map(supportTicket, SupportTicketResponseDTO.class);
+    }
+    @Test
+    void shouldGetTicketsByMemberSuccessfully() {
+
+        UUID memberId =
+                SupportTicketTestDataFactory.MEMBER_ID;
+
+        List<SupportTicket> tickets =
+                List.of(supportTicket);
+
+        when(supportTicketRepository.findByMemberId(memberId))
+                .thenReturn(tickets);
+
+        when(modelMapper.map(
+                supportTicket,
+                SupportTicketResponseDTO.class))
+                .thenReturn(responseDTO);
+
+        List<SupportTicketResponseDTO> result =
+                supportTicketService.getTicketsByMember(memberId);
+
+        assertNotNull(result);
+
+        assertEquals(1, result.size());
+
+        assertEquals(
+                responseDTO.getTicketId(),
+                result.get(0).getTicketId()
+        );
+
+        assertEquals(
+                responseDTO.getMemberId(),
+                result.get(0).getMemberId()
+        );
+
+        assertEquals(
+                responseDTO.getFirstName(),
+                result.get(0).getFirstName()
+        );
+
+        assertEquals(
+                responseDTO.getLastName(),
+                result.get(0).getLastName()
+        );
+
+        assertEquals(
+                responseDTO.getEmail(),
+                result.get(0).getEmail()
+        );
+
+        assertEquals(
+                responseDTO.getSubject(),
+                result.get(0).getSubject()
+        );
+
+        assertEquals(
+                responseDTO.getIssueCategory(),
+                result.get(0).getIssueCategory()
+        );
+
+        assertEquals(
+                responseDTO.getIssueType(),
+                result.get(0).getIssueType()
+        );
+
+        assertEquals(
+                responseDTO.getMessage(),
+                result.get(0).getMessage()
+        );
+
+        assertEquals(
+                responseDTO.getTicketStatus(),
+                result.get(0).getTicketStatus()
+        );
+        verify(memberClient).getMemberById(memberId);
+        verify(supportTicketRepository)
+                .findByMemberId(memberId);
+
+        verify(modelMapper)
+                .map(
+                        supportTicket,
+                        SupportTicketResponseDTO.class
+                );
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenMemberHasNoTickets() {
+
+        UUID memberId = UUID.randomUUID();
+
+        when(supportTicketRepository.findByMemberId(memberId))
+                .thenReturn(List.of());
+
+        List<SupportTicketResponseDTO> result =
+                supportTicketService.getTicketsByMember(memberId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(memberClient).getMemberById(memberId);
+        verify(supportTicketRepository)
+                .findByMemberId(memberId);
+
+        verifyNoInteractions(modelMapper);
+    }
+
+    @Test
+    void shouldGetMultipleTicketsByMemberSuccessfully() {
+
+        SupportTicket secondTicket =
+                SupportTicketTestDataFactory
+                        .createSupportTicket(requestDTO);
+
+        SupportTicketResponseDTO secondResponse =
+                SupportTicketTestDataFactory
+                        .createSupportTicketResponseDTO(secondTicket);
+
+        UUID memberId =
+                SupportTicketTestDataFactory.MEMBER_ID;
+
+        List<SupportTicket> tickets =
+                List.of(supportTicket, secondTicket);
+
+        when(supportTicketRepository.findByMemberId(memberId))
+                .thenReturn(tickets);
+
+        when(modelMapper.map(
+                supportTicket,
+                SupportTicketResponseDTO.class))
+                .thenReturn(responseDTO);
+
+        when(modelMapper.map(
+                secondTicket,
+                SupportTicketResponseDTO.class))
+                .thenReturn(secondResponse);
+
+        List<SupportTicketResponseDTO> result =
+                supportTicketService.getTicketsByMember(memberId);
+
+        assertNotNull(result);
+
+        assertEquals(2, result.size());
+
+        assertEquals(
+                supportTicket.getTicketId(),
+                result.get(0).getTicketId()
+        );
+
+        assertEquals(
+                secondTicket.getTicketId(),
+                result.get(1).getTicketId()
+        );
+
+        verify(supportTicketRepository)
+                .findByMemberId(memberId);
+
+        verify(modelMapper, times(2))
+                .map(
+                        any(SupportTicket.class),
+                        eq(SupportTicketResponseDTO.class)
+                );
+        verify(memberClient).getMemberById(memberId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenMemberDoesNotExist() {
+        UUID memberId = UUID.randomUUID();
+
+        when(memberClient.getMemberById(memberId))
+                .thenThrow(HttpClientErrorException.create(
+                        org.springframework.http.HttpStatus.NOT_FOUND,
+                        "Not Found",
+                        org.springframework.http.HttpHeaders.EMPTY,
+                        new byte[0],
+                        java.nio.charset.StandardCharsets.UTF_8
+                ));
+
+        assertThrows(
+                MemberNotFoundException.class,
+                () -> supportTicketService.getTicketsByMember(memberId)
+        );
+
+        verify(memberClient).getMemberById(memberId);
+        verifyNoInteractions(supportTicketRepository);
+    }
+    @Test
+    void getTicketsByMember_whenMemberServiceIsUnreachable_throwsUnavailableException() {
+        UUID memberId = UUID.randomUUID();
+
+        when(memberClient.getMemberById(memberId))
+                .thenThrow(new ResourceAccessException("Connection refused"));
+
+        assertThrows(
+                MemberServiceUnavailableException.class,
+                () -> supportTicketService.getTicketsByMember(memberId)
+        );
+
+        verify(memberClient).getMemberById(memberId);
     }
 }
