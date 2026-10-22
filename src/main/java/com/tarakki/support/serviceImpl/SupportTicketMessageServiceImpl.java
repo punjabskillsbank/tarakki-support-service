@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class SupportTicketMessageServiceImpl implements SupportTicketMessageService {
@@ -31,5 +34,21 @@ public class SupportTicketMessageServiceImpl implements SupportTicketMessageServ
         SupportTicketMessage savedMessage = supportTicketMessageRepository.save(ticketMessage);
 
         return modelMapper.map(savedMessage, SupportTicketMessageResponseDTO.class);
+    }
+
+    @Override
+    public List<SupportTicketMessageResponseDTO> getMessageByTicketId(UUID ticketId) {
+
+        if (!supportTicketRepository.existsById(ticketId)) {
+            throw new SupportTicketMessageNotFoundException("Support ticket not found with ID: " + ticketId);
+        }
+
+        List<SupportTicketMessage> supportTicketMessageList = supportTicketMessageRepository
+                .findByTicketId(ticketId);
+
+        return supportTicketMessageList.stream()
+                .map(supportTicketMessage -> modelMapper
+                        .map(supportTicketMessage, SupportTicketMessageResponseDTO.class))
+                .toList();
     }
 }
