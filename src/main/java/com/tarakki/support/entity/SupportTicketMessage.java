@@ -3,6 +3,7 @@ package com.tarakki.support.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,17 +25,21 @@ public class SupportTicketMessage {
     @Column(name = "ticket_id", nullable = false)
     private UUID ticketId;
 
-    @Column(name = "support_id", nullable = true)
+    @Column(name = "support_id", nullable = false)
     private UUID supportId;
 
-    @Column(name = "user_id", nullable = true)
+    @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "message_body", nullable = true, columnDefinition = "TEXT")
+    @Column(name = "message_body", nullable = false, columnDefinition = "TEXT")
     private String messageBody;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
 }

@@ -40,7 +40,7 @@ public class SupportTicketMessageServiceImpl implements SupportTicketMessageServ
     public List<SupportTicketMessageResponseDTO> getMessageByTicketId(UUID ticketId) {
 
         if (!supportTicketRepository.existsById(ticketId)) {
-            throw new IllegalArgumentException("Support ticket not found with ID: " + ticketId);
+            throw new SupportTicketMessageNotFoundException("Support ticket not found with ID: " + ticketId);
         }
 
         List<SupportTicketMessage> supportTicketMessageList = supportTicketMessageRepository
