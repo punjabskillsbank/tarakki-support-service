@@ -103,7 +103,7 @@ public class SupportTicketMessageServiceTest {
     void getMessage_success() {
         when(supportTicketRepository.existsById(ticketId)).thenReturn(true);
 
-        when(supportTicketMessageRepository.findByTicketId(ticketId)).thenReturn(List.of(messageEntity));
+        when(supportTicketMessageRepository.findByTicketIdOrderByCreatedAtAsc(ticketId)).thenReturn(List.of(messageEntity));
 
         when(modelMapper.map(any(SupportTicketMessage.class), eq(SupportTicketMessageResponseDTO.class)))
                 .thenReturn(responseDTO);
@@ -117,7 +117,7 @@ public class SupportTicketMessageServiceTest {
         assertEquals(requestDTO.getUserId(), result.get(0).getUserId());
 
         verify(supportTicketRepository).existsById(ticketId);
-        verify(supportTicketMessageRepository).findByTicketId(ticketId);
+        verify(supportTicketMessageRepository).findByTicketIdOrderByCreatedAtAsc(ticketId);
         verify(modelMapper).map(any(SupportTicketMessage.class), eq(SupportTicketMessageResponseDTO.class));
 
 

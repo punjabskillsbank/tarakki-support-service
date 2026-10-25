@@ -40,11 +40,11 @@ public class SupportTicketMessageServiceImpl implements SupportTicketMessageServ
     public List<SupportTicketMessageResponseDTO> getMessageByTicketId(UUID ticketId) {
 
         if (!supportTicketRepository.existsById(ticketId)) {
-            throw new SupportTicketMessageNotFoundException("Support ticket not found with ID: " + ticketId);
+            throw new SupportTicketMessageNotFoundException(ticketId);
         }
 
         List<SupportTicketMessage> supportTicketMessageList = supportTicketMessageRepository
-                .findByTicketId(ticketId);
+                .findByTicketIdOrderByCreatedAtAsc(ticketId);
 
         return supportTicketMessageList.stream()
                 .map(supportTicketMessage -> modelMapper
