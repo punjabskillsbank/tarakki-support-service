@@ -2,6 +2,7 @@ package com.tarakki.support.controller;
 
 import com.tarakki.support.dto.SupportTicketRequestDTO;
 import com.tarakki.support.dto.SupportTicketResponseDTO;
+import com.tarakki.support.dto.SupportTicketStatusUpdateRequestDTO;
 import com.tarakki.support.service.SupportTicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,17 @@ public class SupportTicketController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .body(ticket);
+    }
+
+    @PatchMapping("/status")
+    public ResponseEntity<SupportTicketResponseDTO> updateTicketStatus(
+            @Valid @RequestBody SupportTicketStatusUpdateRequestDTO requestDTO) {
+
+        SupportTicketResponseDTO ticket = supportTicketService.updateTicketStatus(requestDTO);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(ticket);
     }
 }

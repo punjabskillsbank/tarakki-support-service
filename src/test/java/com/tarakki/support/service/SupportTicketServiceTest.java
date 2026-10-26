@@ -2,7 +2,10 @@ package com.tarakki.support.service;
 
 import com.tarakki.support.dto.SupportTicketRequestDTO;
 import com.tarakki.support.dto.SupportTicketResponseDTO;
+import com.tarakki.support.dto.SupportTicketStatusUpdateRequestDTO;
 import com.tarakki.support.entity.SupportTicket;
+import com.tarakki.support.enums.TicketStatus;
+import com.tarakki.support.exception.SupportTicketNotFoundException;
 import com.tarakki.support.repository.SupportTicketRepository;
 import com.tarakki.support.serviceImpl.SupportTicketServiceImpl;
 import com.tarakki.support.util.SupportTicketTestDataFactory;
@@ -15,6 +18,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -101,5 +107,52 @@ class SupportTicketServiceTest {
         verify(supportTicketRepository, times(1))
                 .save(any(SupportTicket.class));
         verify(modelMapper).map(supportTicket, SupportTicketResponseDTO.class);
+    }
+
+    @Test
+    void shouldUpdateTicketStatusSuccessfully() {
+        UUID ticketId = supportTicket.getTicketId();
+        SupportTicketStatusUpdateRequestDTO updateDTO =
+                SupportTicketTestDataFactory.createSupportTicketStatusUpdateRequestDTO(ticketId, TicketStatus.IN_PROGRESS);
+
+        SupportTicket updatedTicket = SupportTicketTestDataFactory.createSupportTicket(requestDTO);
+        updatedTicket.setTicketId(ticketId);
+        updatedTicket.setTicketStatus(TicketStatus.IN_PROGRESS);
+
+        SupportTicketResponseDTO updatedResponseDTO =
+                SupportTicketTestDataFactory.createSupportTicketResponseDTO(updatedTicket);
+
+        when(supportTicketRepository.findById(ticketId)).thenReturn(Optional.of(supportTicket));
+        when(supportTicketRepository.save(supportTicket)).thenReturn(updatedTicket);
+        when(modelMapper.map(updatedTicket, SupportTicketResponseDTO.class)).thenReturn(updatedResponseDTO);
+
+        SupportTicketResponseDTO result = supportTicketService.updateTicketStatus(updateDTO);
+
+        assertNotNull(result);
+        assertEquals(TicketStatus.IN_PROGRESS, result.getTicketStatus());
+        assertEquals(ticketId, result.getTicketId());
+
+        verify(supportTicketRepository, times(1)).findById(ticketId);
+        verify(supportTicketRepository, times(1)).save(supportTicket);
+        verify(modelMapper, times(1)).map(updatedTicket, SupportTicketResponseDTO.class);
+    }
+
+    @Test
+    void shouldThrowSupportTicketNotFoundExceptionWhenTicketDoesNotExist() {
+        UUID ticketId = UUID.randomUUID();
+        SupportTicketStatusUpdateRequestDTO updateDTO =
+                SupportTicketTestDataFactory.createSupportTicketStatusUpdateRequestDTO(ticketId, TicketStatus.RESOLVED);
+
+        when(supportTicketRepository.findById(ticketId)).thenReturn(Optional.empty());
+
+        SupportTicketNotFoundException exception = assertThrows(
+                SupportTicketNotFoundException.class,
+                () -> supportTicketService.updateTicketStatus(updateDTO)
+        );
+
+        assertEquals("Support ticket not found with ID: " + ticketId, exception.getMessage());
+        verify(supportTicketRepository, times(1)).findById(ticketId);
+        verify(supportTicketRepository, never()).save(any());
+        verify(modelMapper, never()).map(any(), any());
     }
 }

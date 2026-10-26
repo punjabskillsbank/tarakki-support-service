@@ -59,6 +59,15 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error").value("Support ticket not found with ID: abc-123"));
     }
 
+    @Test
+    @DisplayName("GET on missing support ticket - should return 404 Not Found with error message")
+    void shouldReturn404_WhenSupportTicketNotFound() throws Exception {
+
+        mockMvc.perform(get("/test/ticket-not-found"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Support ticket not found with ID: ticket-123"));
+    }
+
     @RestController
     static class TestController {
 
@@ -70,6 +79,11 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/not-found")
         public void throwNotFound() {
             throw new SupportTicketMessageNotFoundException("abc-123");
+        }
+
+        @GetMapping("/test/ticket-not-found")
+        public void throwTicketNotFound() {
+            throw new SupportTicketNotFoundException("ticket-123");
         }
     }
 }
