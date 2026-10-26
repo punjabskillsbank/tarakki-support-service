@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/support/tickets")
 @RequiredArgsConstructor
@@ -37,5 +40,12 @@ public class SupportTicketController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ticket);
+    }
+
+    @GetMapping("/{memberId}")
+    public ResponseEntity<List<SupportTicketResponseDTO>> getTicketsByMemberId(@PathVariable UUID memberId) {
+
+        List<SupportTicketResponseDTO> result = supportTicketService.getTicketsByMember(memberId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

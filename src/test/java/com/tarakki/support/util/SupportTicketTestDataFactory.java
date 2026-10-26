@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class SupportTicketTestDataFactory {
-
+    public static final UUID MEMBER_ID = UUID.randomUUID();
     public static SupportTicketRequestDTO createSupportTicketRequestDTO() {
 
         String uniqueValue = UUID.randomUUID()
@@ -25,7 +25,7 @@ public class SupportTicketTestDataFactory {
 
         SupportTicketRequestDTO dto = new SupportTicketRequestDTO();
 
-        dto.setMemberId(UUID.randomUUID());
+        dto.setMemberId(MEMBER_ID);
         dto.setFirstName("User" + uniqueValue);
         dto.setLastName("Test" + uniqueValue);
         dto.setEmail("user" + uniqueValue + "@gmail.com");
