@@ -165,6 +165,8 @@ class SupportTicketServiceTest {
         verify(supportTicketRepository, times(1)).findById(ticketId);
         verify(supportTicketRepository, never()).save(any());
         verify(modelMapper, never()).map(any(), any());
+    }
+
     @Test
     void shouldGetTicketsByMemberSuccessfully() {
 
