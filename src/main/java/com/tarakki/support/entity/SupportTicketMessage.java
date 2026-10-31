@@ -25,10 +25,10 @@ public class SupportTicketMessage {
     @Column(name = "ticket_id", nullable = false)
     private UUID ticketId;
 
-    @Column(name = "support_id", nullable = false)
+    @Column(name = "support_id", nullable = true)
     private UUID supportId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = true)
     private UUID userId;
 
     @Column(name = "message_body", nullable = false, columnDefinition = "TEXT")
