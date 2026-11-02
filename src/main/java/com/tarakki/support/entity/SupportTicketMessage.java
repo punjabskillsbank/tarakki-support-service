@@ -15,23 +15,23 @@ import java.util.UUID;
 @Setter
 @Builder(toBuilder = true)
 @Table(name = "support_message")
-public class SupportTicketMessage  {
+public class SupportTicketMessage {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "message_id", nullable = false, updatable = false)
     private UUID messageId;
 
     @Column(name = "ticket_id", nullable = false)
     private UUID ticketId;
 
-    @Column(name = "support_id")
+    @Column(name = "support_id", nullable = true)
     private UUID supportId;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = true)
     private UUID userId;
 
-    @Column(name = "message_body", columnDefinition = "TEXT")
+    @Column(name = "message_body", nullable = false, columnDefinition = "TEXT")
     private String messageBody;
 
     @CreationTimestamp
@@ -41,4 +41,5 @@ public class SupportTicketMessage  {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 }

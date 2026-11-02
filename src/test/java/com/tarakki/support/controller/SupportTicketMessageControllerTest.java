@@ -15,10 +15,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -71,5 +73,19 @@ class SupportTicketMessageControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("GET /api/support/tickets/messages/{ticket_id} - Success 200 OK")
+    void getMessage_Returns200_OK() throws Exception {
+
+        when(supportTicketMessageService.getMessageByTicketId(ticketId)).thenReturn(List.of(responseDTO));
+
+        mockMvc.perform(get("/api/support/tickets/messages/{ticketId}",ticketId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].messageId").value(messageId.toString()))
+                .andExpect(jsonPath("$[0].ticketId").value(ticketId.toString()))
+                .andExpect(jsonPath("$[0].messageBody").value(responseDTO.getMessageBody()));
     }
 }

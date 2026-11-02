@@ -81,7 +81,6 @@ public class SupportTicketTestDataFactory {
                 .updatedAt(ticket.getUpdatedAt())
                 .build();
     }
-
     public static SupportTicketMessageRequestDTO createSupportTicketMessageRequestDTO(UUID ticketId) {
         return SupportTicketMessageRequestDTO.builder()
                 .ticketId(ticketId)
