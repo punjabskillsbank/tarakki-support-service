@@ -18,5 +18,5 @@ public class SupportTicketStatusUpdateRequestDTO {
     private UUID ticketId;
 
     @NotNull(message = "Ticket status cannot be null")
-    private TicketStatus status;
+    private TicketStatus ticketStatus;
 }

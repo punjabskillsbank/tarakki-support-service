@@ -134,6 +134,7 @@ class SupportTicketServiceTest {
                 SupportTicketTestDataFactory.createSupportTicketResponseDTO(updatedTicket);
 
         when(supportTicketRepository.findById(ticketId)).thenReturn(Optional.of(supportTicket));
+        doNothing().when(modelMapper).map(updateDTO, supportTicket);
         when(supportTicketRepository.save(supportTicket)).thenReturn(updatedTicket);
         when(modelMapper.map(updatedTicket, SupportTicketResponseDTO.class)).thenReturn(updatedResponseDTO);
 
@@ -144,6 +145,7 @@ class SupportTicketServiceTest {
         assertEquals(ticketId, result.getTicketId());
 
         verify(supportTicketRepository, times(1)).findById(ticketId);
+        verify(modelMapper, times(1)).map(updateDTO, supportTicket);
         verify(supportTicketRepository, times(1)).save(supportTicket);
         verify(modelMapper, times(1)).map(updatedTicket, SupportTicketResponseDTO.class);
     }

@@ -121,7 +121,7 @@ public class SupportTicketTestDataFactory {
             UUID ticketId, TicketStatus status) {
         return SupportTicketStatusUpdateRequestDTO.builder()
                 .ticketId(ticketId)
-                .status(status)
+                .ticketStatus(status)
                 .build();
     }
 }

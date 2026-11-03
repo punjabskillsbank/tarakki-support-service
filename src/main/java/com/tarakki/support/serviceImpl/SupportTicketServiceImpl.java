@@ -53,7 +53,7 @@ public class SupportTicketServiceImpl implements SupportTicketService {
         SupportTicket ticket = supportTicketRepository.findById(requestDTO.getTicketId())
                 .orElseThrow(() -> new SupportTicketNotFoundException(requestDTO.getTicketId()));
 
-        ticket.setTicketStatus(requestDTO.getStatus());
+        modelMapper.map(requestDTO, ticket);
 
         SupportTicket updatedTicket = supportTicketRepository.save(ticket);
 
