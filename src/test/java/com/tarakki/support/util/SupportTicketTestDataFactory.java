@@ -3,6 +3,7 @@ package com.tarakki.support.util;
 import com.tarakki.support.dto.SupportTicketMessageRequestDTO;
 import com.tarakki.support.dto.SupportTicketMessageResponseDTO;
 import com.tarakki.support.dto.SupportTicketRequestDTO;
+import com.tarakki.support.dto.SupportTicketStatusUpdateRequestDTO;
 import com.tarakki.support.entity.SupportTicketMessage;
 import com.tarakki.support.enums.IssueCategory;
 import com.tarakki.support.enums.IssueType;
@@ -112,6 +113,14 @@ public class SupportTicketTestDataFactory {
                 .supportId(dto.getSupportId())
                 .messageBody(dto.getMessageBody())
                 .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static SupportTicketStatusUpdateRequestDTO createSupportTicketStatusUpdateRequestDTO(
+            UUID ticketId, TicketStatus status) {
+        return SupportTicketStatusUpdateRequestDTO.builder()
+                .ticketId(ticketId)
+                .ticketStatus(status)
                 .build();
     }
 }
