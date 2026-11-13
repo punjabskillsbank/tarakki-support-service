@@ -48,4 +48,10 @@ public class SupportTicketController {
         List<SupportTicketResponseDTO> result = supportTicketService.getTicketsByMember(memberId);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @GetMapping
+    public ResponseEntity<List<SupportTicketResponseDTO>> getAllTickets() {
+        List<SupportTicketResponseDTO> tickets = supportTicketService.getAllTickets();
+        return ResponseEntity.ok(tickets);
+    }
 }

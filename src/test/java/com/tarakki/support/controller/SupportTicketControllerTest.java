@@ -211,4 +211,47 @@ class SupportTicketControllerTest {
 
         verify(supportTicketService).getTicketsByMember(memberId);
     }
+    @Test
+    @DisplayName("GET /api/support/tickets - Success 200 OK")
+    void shouldGetAllTicketsAndReturn200Ok() throws Exception {
+        List<SupportTicketResponseDTO> tickets = List.of(output);
+
+        when(supportTicketService.getAllTickets()).thenReturn(tickets);
+
+        mockMvc.perform(
+                        get("/api/support/tickets")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].ticketId").value(output.getTicketId().toString()))
+                .andExpect(jsonPath("$[0].memberId").value(output.getMemberId().toString()))
+                .andExpect(jsonPath("$[0].firstName").value(output.getFirstName()))
+                .andExpect(jsonPath("$[0].lastName").value(output.getLastName()))
+                .andExpect(jsonPath("$[0].email").value(output.getEmail()))
+                .andExpect(jsonPath("$[0].subject").value(output.getSubject()))
+                .andExpect(jsonPath("$[0].issueCategory").value(output.getIssueCategory().name()))
+                .andExpect(jsonPath("$[0].issueType").value(output.getIssueType().name()))
+                .andExpect(jsonPath("$[0].message").value(output.getMessage()))
+                .andExpect(jsonPath("$[0].ticketStatus").value(output.getTicketStatus().name()));
+
+        verify(supportTicketService).getAllTickets();
+    }
+
+    @Test
+    @DisplayName("GET /api/support/tickets - Empty list returns 200 OK")
+    void shouldReturnEmptyListWhenNoTicketsExist() throws Exception {
+        when(supportTicketService.getAllTickets()).thenReturn(List.of());
+
+        mockMvc.perform(
+                        get("/api/support/tickets")
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        verify(supportTicketService).getAllTickets();
+    }
 }
