@@ -13,4 +13,6 @@ public interface SupportTicketService {
     SupportTicketResponseDTO updateTicketStatus(SupportTicketStatusUpdateRequestDTO requestDTO);
 
     List<SupportTicketResponseDTO> getTicketsByMember(UUID memberId);
+
+    List<SupportTicketResponseDTO> getAllTickets();
 }
