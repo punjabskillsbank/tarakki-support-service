@@ -366,4 +366,65 @@ class SupportTicketServiceTest {
 
         verify(memberClient).getMemberById(memberId);
     }
+    @Test
+    void shouldGetAllTicketsSuccessfully() {
+        List<SupportTicket> tickets = List.of(supportTicket);
+
+        when(supportTicketRepository.findAll()).thenReturn(tickets);
+        when(modelMapper.map(supportTicket, SupportTicketResponseDTO.class)).thenReturn(responseDTO);
+
+        List<SupportTicketResponseDTO> result = supportTicketService.getAllTickets();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(responseDTO.getTicketId(), result.get(0).getTicketId());
+        assertEquals(responseDTO.getMemberId(), result.get(0).getMemberId());
+        assertEquals(responseDTO.getFirstName(), result.get(0).getFirstName());
+        assertEquals(responseDTO.getLastName(), result.get(0).getLastName());
+        assertEquals(responseDTO.getEmail(), result.get(0).getEmail());
+        assertEquals(responseDTO.getSubject(), result.get(0).getSubject());
+        assertEquals(responseDTO.getIssueCategory(), result.get(0).getIssueCategory());
+        assertEquals(responseDTO.getIssueType(), result.get(0).getIssueType());
+        assertEquals(responseDTO.getMessage(), result.get(0).getMessage());
+        assertEquals(responseDTO.getTicketStatus(), result.get(0).getTicketStatus());
+
+        verify(supportTicketRepository, times(1)).findAll();
+        verify(modelMapper, times(1)).map(supportTicket, SupportTicketResponseDTO.class);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoTicketsExist() {
+        when(supportTicketRepository.findAll()).thenReturn(List.of());
+
+        List<SupportTicketResponseDTO> result = supportTicketService.getAllTickets();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(supportTicketRepository, times(1)).findAll();
+        verifyNoInteractions(modelMapper);
+    }
+
+    @Test
+    void shouldGetAllMultipleTicketsSuccessfully() {
+        SupportTicket secondTicket =
+                SupportTicketTestDataFactory.createSupportTicket(requestDTO);
+        SupportTicketResponseDTO secondResponse =
+                SupportTicketTestDataFactory.createSupportTicketResponseDTO(secondTicket);
+
+        List<SupportTicket> tickets = List.of(supportTicket, secondTicket);
+
+        when(supportTicketRepository.findAll()).thenReturn(tickets);
+        when(modelMapper.map(supportTicket, SupportTicketResponseDTO.class)).thenReturn(responseDTO);
+        when(modelMapper.map(secondTicket, SupportTicketResponseDTO.class)).thenReturn(secondResponse);
+
+        List<SupportTicketResponseDTO> result = supportTicketService.getAllTickets();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        verify(supportTicketRepository, times(1)).findAll();
+        verify(modelMapper, times(1)).map(supportTicket, SupportTicketResponseDTO.class);
+        verify(modelMapper, times(1)).map(secondTicket, SupportTicketResponseDTO.class);
+    }
 }
