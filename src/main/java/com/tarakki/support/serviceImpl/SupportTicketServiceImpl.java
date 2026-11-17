@@ -82,4 +82,14 @@ public class SupportTicketServiceImpl implements SupportTicketService {
                         modelMapper.map(ticket, SupportTicketResponseDTO.class))
                 .toList();
     }
+
+    @Override
+    public List<SupportTicketResponseDTO> getAllTickets() {
+        List<SupportTicket> tickets = supportTicketRepository.findAll();
+
+        return tickets.stream()
+                .map(ticket ->
+                        modelMapper.map(ticket, SupportTicketResponseDTO.class))
+                .toList();
+    }
 }
