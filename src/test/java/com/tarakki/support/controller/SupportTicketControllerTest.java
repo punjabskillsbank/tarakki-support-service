@@ -73,6 +73,7 @@ class SupportTicketControllerTest {
                 .andExpect(jsonPath("$.message").value(input.getMessage()))
                 .andExpect(jsonPath("$.ticketStatus").value("OPEN"));
     }
+
     @Test
     @DisplayName("PATCH /api/support/tickets/status - Success 200 OK")
     void shouldUpdateTicketStatusSuccessfully() throws Exception {
@@ -143,7 +144,7 @@ class SupportTicketControllerTest {
                 .thenReturn(tickets);
 
         mockMvc.perform(
-                        get("/api/support/tickets/{memberId}", memberId)
+                        get("/api/support/tickets/member/{memberId}", memberId)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -183,7 +184,7 @@ class SupportTicketControllerTest {
                 .thenReturn(List.of());
 
         mockMvc.perform(
-                        get("/api/support/tickets/{memberId}", memberId)
+                        get("/api/support/tickets/member/{memberId}", memberId)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -202,15 +203,16 @@ class SupportTicketControllerTest {
                 .thenThrow(new MemberNotFoundException(memberId));
 
         mockMvc.perform(
-                        get("/api/support/tickets/{memberId}", memberId)
+                        get("/api/support/tickets/member/{memberId}", memberId)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath(
-                "$.error")
-                .value("Member not found with id: " + memberId));
+                        "$.error")
+                        .value("Member not found with id: " + memberId));
 
         verify(supportTicketService).getTicketsByMember(memberId);
     }
+
     @Test
     @DisplayName("GET /api/support/tickets - Success 200 OK")
     void shouldGetAllTicketsAndReturn200Ok() throws Exception {
@@ -254,4 +256,30 @@ class SupportTicketControllerTest {
 
         verify(supportTicketService).getAllTickets();
     }
+
+
+    @Test
+    @DisplayName("GET /api/support/tickets/{ticketId} - Success 200 OK")
+    void shouldReturnTicketAndReturn200Ok() throws Exception {
+        when(supportTicketService.getTicketById(output.getTicketId()))
+                .thenReturn(output);
+        mockMvc.perform(
+                        get("/api/support/tickets/{ticketId}", output.getTicketId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ticketId").value(output.getTicketId().toString()))
+                .andExpect(jsonPath("$.memberId").value(output.getMemberId().toString()))
+                .andExpect(jsonPath("$.firstName").value(output.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(output.getLastName()))
+                .andExpect(jsonPath("$.email").value(output.getEmail()))
+                .andExpect(jsonPath("$.subject").value(output.getSubject()))
+                .andExpect(jsonPath("$.issueCategory").value(output.getIssueCategory().name()))
+                .andExpect(jsonPath("$.issueType").value(output.getIssueType().name()))
+                .andExpect(jsonPath("$.message").value(output.getMessage()))
+                .andExpect(jsonPath("$.ticketStatus").value(output.getTicketStatus().name()));
+
+        verify(supportTicketService).getTicketById(output.getTicketId());
+    }
+
 }

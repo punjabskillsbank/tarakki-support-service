@@ -92,4 +92,12 @@ public class SupportTicketServiceImpl implements SupportTicketService {
                         modelMapper.map(ticket, SupportTicketResponseDTO.class))
                 .toList();
     }
+
+    @Override
+    public SupportTicketResponseDTO getTicketById(UUID ticketId) {
+        SupportTicket supportTicket = supportTicketRepository.findById(ticketId)
+                .orElseThrow(() -> new SupportTicketNotFoundException(ticketId));
+        return modelMapper.map(supportTicket, SupportTicketResponseDTO.class);
+    }
+
 }

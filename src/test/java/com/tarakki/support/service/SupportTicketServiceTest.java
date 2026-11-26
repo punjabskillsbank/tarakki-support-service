@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.UUID;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,12 +51,14 @@ class SupportTicketServiceTest {
     private SupportTicketRequestDTO requestDTO;
     private SupportTicket supportTicket;
     private SupportTicketResponseDTO responseDTO;
+    private UUID ticketId;
 
     @BeforeEach
     void setUp() {
         requestDTO = SupportTicketTestDataFactory.createSupportTicketRequestDTO();
         supportTicket = SupportTicketTestDataFactory.createSupportTicket(requestDTO);
         responseDTO = SupportTicketTestDataFactory.createSupportTicketResponseDTO(supportTicket);
+        ticketId = UUID.randomUUID();
     }
 
     @Test
@@ -352,6 +353,7 @@ class SupportTicketServiceTest {
         verify(memberClient).getMemberById(memberId);
         verifyNoInteractions(supportTicketRepository);
     }
+
     @Test
     void getTicketsByMember_whenMemberServiceIsUnreachable_throwsUnavailableException() {
         UUID memberId = UUID.randomUUID();
@@ -366,6 +368,7 @@ class SupportTicketServiceTest {
 
         verify(memberClient).getMemberById(memberId);
     }
+
     @Test
     void shouldGetAllTicketsSuccessfully() {
         List<SupportTicket> tickets = List.of(supportTicket);
@@ -427,4 +430,43 @@ class SupportTicketServiceTest {
         verify(modelMapper, times(1)).map(supportTicket, SupportTicketResponseDTO.class);
         verify(modelMapper, times(1)).map(secondTicket, SupportTicketResponseDTO.class);
     }
+
+
+    @Test
+    void shouldGetTicketByIdSuccessfully() {
+
+        when(supportTicketRepository.findById(ticketId)).thenReturn(Optional.of(supportTicket));
+        when(modelMapper.map(any(SupportTicket.class), eq(SupportTicketResponseDTO.class))).thenReturn(responseDTO);
+
+        SupportTicketResponseDTO result = supportTicketService.getTicketById(ticketId);
+
+        assertNotNull(result);
+
+        assertEquals(requestDTO.getFirstName(), result.getFirstName());
+        assertEquals(requestDTO.getLastName(), result.getLastName());
+        assertEquals(requestDTO.getMemberId(), result.getMemberId());
+        assertEquals(requestDTO.getEmail(), result.getEmail());
+        assertEquals(requestDTO.getIssueCategory(), result.getIssueCategory());
+        assertEquals(requestDTO.getIssueType(), result.getIssueType());
+        assertEquals(requestDTO.getMessage(), result.getMessage());
+        assertEquals(requestDTO.getSubject(), result.getSubject());
+
+    }
+
+    @Test
+    void getTicketById_TicketNotFound_throwsException() {
+
+        when(supportTicketRepository.findById(ticketId)).thenReturn(Optional.empty());
+
+        SupportTicketNotFoundException exception = assertThrows(
+                SupportTicketNotFoundException.class,
+                () -> supportTicketService.getTicketById(ticketId)
+        );
+
+        assertEquals("Support ticket not found with ID: " + ticketId, exception.getMessage());
+
+        verify(supportTicketRepository, times(1)).findById(ticketId);
+        verify(modelMapper, never()).map(any(SupportTicket.class), eq(SupportTicketResponseDTO.class));
+    }
+
 }

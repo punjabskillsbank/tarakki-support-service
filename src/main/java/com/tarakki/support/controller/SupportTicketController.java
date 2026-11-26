@@ -42,7 +42,7 @@ public class SupportTicketController {
                 .body(ticket);
     }
 
-    @GetMapping("/{memberId}")
+    @GetMapping("/member/{memberId}")
     public ResponseEntity<List<SupportTicketResponseDTO>> getTicketsByMemberId(@PathVariable UUID memberId) {
 
         List<SupportTicketResponseDTO> result = supportTicketService.getTicketsByMember(memberId);
@@ -53,5 +53,13 @@ public class SupportTicketController {
     public ResponseEntity<List<SupportTicketResponseDTO>> getAllTickets() {
         List<SupportTicketResponseDTO> tickets = supportTicketService.getAllTickets();
         return ResponseEntity.ok(tickets);
+    }
+
+    @GetMapping("/{ticketId}")
+    public ResponseEntity<SupportTicketResponseDTO> getTicketById(@PathVariable UUID ticketId) {
+
+        SupportTicketResponseDTO supportTicket = supportTicketService.getTicketById(ticketId);
+        return ResponseEntity.ok(supportTicket);
+
     }
 }
