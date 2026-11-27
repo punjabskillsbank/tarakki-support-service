@@ -6,6 +6,7 @@ import com.tarakki.support.dto.SupportTicketStatusUpdateRequestDTO;
 import com.tarakki.support.entity.SupportTicket;
 import com.tarakki.support.enums.TicketStatus;
 import com.tarakki.support.exception.MemberNotFoundException;
+import com.tarakki.support.exception.SupportTicketNotFoundException;
 import com.tarakki.support.service.SupportTicketService;
 import com.tarakki.support.util.SupportTicketTestDataFactory;
 
@@ -280,6 +281,22 @@ class SupportTicketControllerTest {
                 .andExpect(jsonPath("$.ticketStatus").value(output.getTicketStatus().name()));
 
         verify(supportTicketService).getTicketById(output.getTicketId());
+    }
+
+    @Test
+    void shouldReturn404WhenTicketNotFound() throws Exception {
+        UUID ticketId = UUID.randomUUID();
+        when(supportTicketService.getTicketById(ticketId))
+                .thenThrow(new SupportTicketNotFoundException(ticketId));
+        mockMvc.perform(
+                        get("/api/support/tickets/{ticketId}", ticketId)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath(
+                        "$.error"
+                )
+                        .value("Support ticket not found with ID: " + ticketId));
+        verify(supportTicketService).getTicketById(ticketId);
     }
 
 }

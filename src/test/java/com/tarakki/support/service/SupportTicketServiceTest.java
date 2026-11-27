@@ -436,11 +436,13 @@ class SupportTicketServiceTest {
     void shouldGetTicketByIdSuccessfully() {
 
         when(supportTicketRepository.findById(ticketId)).thenReturn(Optional.of(supportTicket));
-        when(modelMapper.map(any(SupportTicket.class), eq(SupportTicketResponseDTO.class))).thenReturn(responseDTO);
+        when(modelMapper.map(supportTicket,SupportTicketResponseDTO.class)).thenReturn(responseDTO);
 
         SupportTicketResponseDTO result = supportTicketService.getTicketById(ticketId);
 
         assertNotNull(result);
+
+        assertSame(responseDTO, result);
 
         assertEquals(requestDTO.getFirstName(), result.getFirstName());
         assertEquals(requestDTO.getLastName(), result.getLastName());
@@ -451,6 +453,8 @@ class SupportTicketServiceTest {
         assertEquals(requestDTO.getMessage(), result.getMessage());
         assertEquals(requestDTO.getSubject(), result.getSubject());
 
+        verify(supportTicketRepository, times(1)).findById(ticketId);
+        verify(modelMapper, times(1)).map(supportTicket, SupportTicketResponseDTO.class);
     }
 
     @Test
@@ -466,7 +470,7 @@ class SupportTicketServiceTest {
         assertEquals("Support ticket not found with ID: " + ticketId, exception.getMessage());
 
         verify(supportTicketRepository, times(1)).findById(ticketId);
-        verify(modelMapper, never()).map(any(SupportTicket.class), eq(SupportTicketResponseDTO.class));
+        verify(modelMapper, never()).map(supportTicket, SupportTicketResponseDTO.class);
     }
 
 }
